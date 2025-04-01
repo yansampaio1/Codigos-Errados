@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buscador de Cursista</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 50px;
+        }
+        input {
+            padding: 10px;
+            width: 300px;
+            margin-top: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            margin-top: 10px;
+            cursor: pointer;
+        }
+        #resultado {
+            margin-top: 20px;
+            font-size: 18px;
+        }
+        .erro {
+            color: red;
+        }
+        .sucesso {
+            color: green;
+        }
+    </style>
+</head>
+<body>
+    <h1>Buscar Cursista por CPF</h1>
+    <input type="text" id="cpfInput" placeholder="Digite o CPF (somente números)">
+    <button onclick="buscarCursista()">Buscar</button>
+
+    <div id="resultado"></div>
+
+    <script>
+        function buscarCursista() {
+            let cpfInserido = document.getElementById("cpfInput").value.trim();
+
+            // Verificando se o CPF foi informado
+            if (cpfInserido === "") {
+                alert("Por favor, digite um CPF.");
+                return;
+            }
+
+            // Fazendo a requisição à API do Flask
+            fetch(`http://127.0.0.1:5000/buscar?cpf=${cpfInserido}`)
+                .then(response => response.json())  // Convertendo resposta para JSON
+                .then(data => {
+                    let resultadoDiv = document.getElementById("resultado");
+
+                    // Verificando a resposta do servidor
+                    if (data.status === "Cursista encontrado") {
+                        // Exibindo as informações do cursista
+                        resultadoDiv.innerHTML = `
+                            <p class="sucesso"><strong>Nome:</strong> ${data.dados.Nome}</p>
+                            <p class="sucesso"><strong>CPF:</strong> ${data.dados.CPF}</p>
+                            <p class="sucesso"><strong>Curso:</strong> ${data.dados.Curso}</p>
+                            <p class="sucesso"><strong>Data de Inscrição:</strong> ${data.dados['Data de Inscrição']}</p>
+                        `;
+                    } else {
+                        // Exibindo mensagem de erro
+                        resultadoDiv.innerHTML = `<p class="erro">${data.mensagem}</p>`;
+                    }
+                })
+                .catch(error => {
+                    console.error("Erro ao buscar cursista:", error);
+                    document.getElementById("resultado").innerHTML = `<p class="erro">Erro ao buscar cursista. Tente novamente.</p>`;
+                });
+        }
+    </script>
+</body>
+</html>
